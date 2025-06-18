@@ -7,21 +7,21 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = [
             'title', 'description', 'category',
-            'start_datetime', 'end_datetime',
-            'location', 'max_participants', 'is_published'
+            'start_datetime', 'location', 
+            'max_participants', 'status',
+            'price', 'image'
         ]
         widgets = {
             'start_datetime': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-            'end_datetime': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'description': forms.Textarea(attrs={'rows': 4}),
+            'status': forms.Select(choices=Event.Status.choices),
         }
     
-    def clean(self):
-        cleaned_data = super().clean()
-        start = cleaned_data.get('start_datetime')
-        end = cleaned_data.get('end_datetime')
-        
-        if start and end and start >= end:
-            raise forms.ValidationError("Дата окончания должна быть позже даты начала")
-        
-        return cleaned_data
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user and not user.is_superuser:
+            self.fields['status'].choices = [
+                (Event.Status.DRAFT, 'Черновик'),
+                (Event.Status.MODERATION, 'На модерации')
+            ]

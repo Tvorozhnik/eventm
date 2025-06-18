@@ -9,17 +9,22 @@
             <div class="card mb-4">
                 <div class="card-body p-4">
                     <div class="text-center mb-4">
-                        {% if user.avatar %}
-                        <img src="{{ user.avatar.url }}" alt="Аватар" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-                        {% else %}
-                        <img src="https://via.placeholder.com/150" alt="Аватар" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-                        {% endif %}
+                        <div class="avatar-container mb-3" style="width: 150px; height: 150px; margin: 0 auto;">
+                            <img src="{{ user.get_avatar_url }}" alt="Аватар" class="rounded-circle w-100 h-100" style="object-fit: contain; padding: 10px;" id="profile-avatar">
+                        </div>
                         <h3 class="card-title">{{ user.get_full_name|default:user.email }}</h3>
                         <p class="text-muted">{{ user.email }}</p>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h3 class="mb-0">Мой профиль</h3>
+                    <div class="d-flex flex-column gap-2">
                         <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">Редактировать профиль</a>
+                        <a href="{% url 'notifications:list' %}" class="btn btn-outline-primary">
+                            Все уведомления
+                            {% with unread_count=user.get_unread_notifications_count %}
+                                {% if unread_count %}
+                                    <span class="badge bg-danger ms-2">{{ unread_count }}</span>
+                                {% endif %}
+                            {% endwith %}
+                        </a>
                     </div>
                 </div>
             </div>
@@ -57,19 +62,32 @@
 
             <div class="card">
                 <div class="card-body p-4">
-                    <h4 class="card-title mb-4">Организованные мероприятия</h4>
-                    {% if user.organized_events.all %}
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="card-title mb-0">Организованные мероприятия</h4>
+                        <div>
+                            <a href="{% url 'events:events_create' %}" class="btn btn-primary me-2">
+                                <i class="bi bi-plus-lg"></i> Создать
+                            </a>
+                            <a href="{% url 'accounts:organized_events' %}" class="btn btn-outline-primary">
+                                Все мероприятия
+                            </a>
+                        </div>
+                    </div>
+                    {% if latest_organized_events %}
                         <div class="row">
-                            {% for event in user.organized_events.all %}
+                            {% for event in latest_organized_events %}
                             <div class="col-md-6 mb-4">
                                 <div class="card h-100">
-                                    {% if event.image %}
-                                    <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover;">
-                                    {% endif %}
+                                    <img src="{{ event.get_image_url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover;">
                                     <div class="card-body">
                                         <h5 class="card-title">{{ event.title }}</h5>
                                         <p class="card-text text-muted">
                                             <i class="bi bi-calendar"></i> {{ event.start_datetime|date:"d.m.Y H:i" }}
+                                        </p>
+                                        <p class="card-text">
+                                            <span class="badge {% if event.status == 'published' %}bg-success{% elif event.status == 'moderation' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                                {{ event.get_status_display }}
+                                            </span>
                                         </p>
                                         <div class="d-flex justify-content-between">
                                             <a href="{% url 'events:events_detail' event.pk %}" class="btn btn-outline-primary">Подробнее</a>
@@ -88,4 +106,25 @@
         </div>
     </div>
 </div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const avatarImg = document.getElementById('profile-avatar');
+    if (avatarImg) {
+        const timestamp = new Date().getTime();
+        const currentSrc = avatarImg.src;
+        avatarImg.src = currentSrc.includes('?') ? `${currentSrc}&t=${timestamp}` : `${currentSrc}?t=${timestamp}`;
+    }
+});
+</script>
 {% endblock %}

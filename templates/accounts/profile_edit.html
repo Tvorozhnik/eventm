@@ -1,70 +1,152 @@
-{% extends "index.html" %}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Редактирование профиля - EventMaster{% endblock %}
+{% block title %}Редактирование профиля{% endblock %}
 
 {% block content %}
-<div class="container px-4">
+<div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-body p-4">
-                    <h2 class="card-title mb-4">Редактирование профиля</h2>
+                <div class="card-body">
+                    <h1 class="h3 mb-4">Редактирование профиля</h1>
                     
-                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         
-                        {% if form.errors %}
+                        {% if form.non_field_errors %}
                         <div class="alert alert-danger">
-                            {% for field, errors in form.errors.items %}
-                                {% for error in errors %}
-                                    <p class="mb-0">{{ error }}</p>
-                                {% endfor %}
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
                             {% endfor %}
                         </div>
                         {% endif %}
 
-                        <div class="mb-3">
-                            {{ form.first_name.label_tag }}
-                            {{ form.first_name }}
-                            {% if form.first_name.help_text %}
-                            <div class="form-text">{{ form.first_name.help_text }}</div>
-                            {% endif %}
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-4">
+                                <div class="avatar-container" style="width: 100px; height: 100px;">
+                                    <img src="{{ user.get_avatar_url }}" alt="Аватар" class="rounded-circle w-100 h-100" style="object-fit: contain; padding: 20px;" id="avatar-preview">
+                                </div>
+                                
+                                <div class="flex-grow-1">
+                                    <label for="{{ form.avatar.id_for_label }}" class="form-label">Изменить аватар</label>
+                                    {{ form.avatar }}
+                                    {% if form.avatar.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.avatar.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <div class="form-text">Рекомендуемый размер: 200x200 пикселей</div>
+
+                                    {% if user.avatar %}
+                                    <div class="form-check mt-2">
+                                        {{ form.delete_avatar }}
+                                        <label class="form-check-label" for="{{ form.delete_avatar.id_for_label }}">
+                                            Удалить фото профиля
+                                        </label>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">Имя</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.first_name.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">Фамилия</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.last_name.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
 
                         <div class="mb-3">
-                            {{ form.last_name.label_tag }}
-                            {{ form.last_name }}
-                            {% if form.last_name.help_text %}
-                            <div class="form-text">{{ form.last_name.help_text }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            {{ form.email.label_tag }}
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Email *</label>
                             {{ form.email }}
-                            {% if form.email.help_text %}
-                            <div class="form-text">{{ form.email.help_text }}</div>
+                            {% if form.email.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.email.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="form-text">Email является обязательным полем</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.bio.id_for_label }}" class="form-label">О себе</label>
+                            {{ form.bio }}
+                            {% if form.bio.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.bio.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
                             {% endif %}
                         </div>
 
-                        <div class="mb-3">
-                            {{ form.birth_date.label_tag }}
-                            {{ form.birth_date }}
-                            {% if form.birth_date.help_text %}
-                            <div class="form-text">{{ form.birth_date.help_text }}</div>
-                            {% endif %}
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">Изменение пароля</h5>
+                                <div class="mb-3">
+                                    <label for="{{ form.current_password.id_for_label }}" class="form-label">Текущий пароль</label>
+                                    {{ form.current_password }}
+                                    {% if form.current_password.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.current_password.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.new_password1.id_for_label }}" class="form-label">Новый пароль</label>
+                                    {{ form.new_password1 }}
+                                    {% if form.new_password1.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.new_password1.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <div class="form-text">Минимум 8 символов</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.new_password2.id_for_label }}" class="form-label">Подтверждение нового пароля</label>
+                                    {{ form.new_password2 }}
+                                    {% if form.new_password2.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.new_password2.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            {{ form.avatar.label_tag }}
-                            {{ form.avatar }}
-                            {% if form.avatar.help_text %}
-                            <div class="form-text">{{ form.avatar.help_text }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="d-flex justify-content-end">
-                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary me-2">Отмена</a>
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">Отмена</a>
                             <button type="submit" class="btn btn-primary">Сохранить изменения</button>
                         </div>
                     </form>
@@ -73,4 +155,110 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const avatarInput = document.getElementById('{{ form.avatar.id_for_label }}');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const deleteAvatarCheckbox = document.getElementById('{{ form.delete_avatar.id_for_label }}');
+    const defaultAvatarUrl = "{% static 'images/ghost-svgrepo-com.svg' %}";
+
+    // Функция для предпросмотра изображения
+    function previewImage(file) {
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                avatarPreview.src = e.target.result;
+                if (deleteAvatarCheckbox) {
+                    deleteAvatarCheckbox.checked = false;
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Обработчик изменения файла
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                previewImage(this.files[0]);
+            }
+        });
+    }
+
+    // Обработчик удаления аватара
+    if (deleteAvatarCheckbox) {
+        deleteAvatarCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                avatarPreview.src = defaultAvatarUrl;
+                if (avatarInput) {
+                    avatarInput.value = '';
+                }
+            } else {
+                avatarPreview.src = "{{ user.get_avatar_url }}";
+            }
+        });
+    }
+});
+</script>
+
+<style>
+    .form-control {
+        border-radius: 0;
+        border: 1px solid #e0e0e0;
+        padding: 0.5rem;
+    }
+
+    .form-control:focus {
+        border-color: #000;
+        box-shadow: none;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+    }
+
+    .btn {
+        border-radius: 0;
+        padding: 0.5rem 1.5rem;
+    }
+
+    .btn-primary {
+        background-color: #000;
+        border-color: #000;
+    }
+
+    .btn-primary:hover {
+        background-color: #333;
+        border-color: #333;
+    }
+
+    .btn-outline-secondary {
+        border-color: #e0e0e0;
+        color: #000;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        border-color: #e0e0e0;
+        color: #000;
+    }
+
+    .card {
+        border-radius: 0;
+        border: 1px solid #e0e0e0;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .avatar-container img {
+        transition: opacity 0.3s ease;
+    }
+
+    .avatar-container:hover img {
+        opacity: 0.8;
+    }
+</style>
 {% endblock %} 

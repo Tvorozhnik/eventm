@@ -141,6 +141,71 @@
         .dropdown-item:hover {
             background-color: var(--hover-color);
         }
+
+        /* Стили для уведомлений */
+        .notifications-dropdown {
+            min-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .notification-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .notification-item.unread {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+
+        .notification-content {
+            margin-left: 0.5rem;
+        }
+
+        .notification-text {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            transform: translate(50%, -50%);
+            background-color: #dc3545;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            min-width: 1.5rem;
+            text-align: center;
+        }
+
+        .notification-actions {
+            padding: 0.5rem 1rem;
+            text-align: center;
+        }
+
+        .no-notifications {
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .notifications-btn {
+            position: relative;
+            padding: 0.5rem;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -162,13 +227,38 @@
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link notifications-btn" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="far fa-bell"></i>
+                                {% with unread_count=user.get_unread_notifications_count %}
+                                    <span class="notification-badge {% if not unread_count %}d-none{% endif %}">{{ unread_count }}</span>
+                                {% endwith %}
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end notifications-dropdown" aria-labelledby="notificationsDropdown">
+                                <div class="notifications-content">
+                                    <div class="text-center p-3">
+                                        <div class="spinner-border spinner-border-sm" role="status">
+                                            <span class="visually-hidden">Загрузка...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <div class="avatar-container" style="width: 32px; height: 32px;">
+                                    <img src="{{ user.get_avatar_url }}" alt="Аватар" class="rounded-circle w-100 h-100" style="object-fit: contain; padding: 6px;">
+                                </div>
                                 {{ user.get_full_name|default:user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Профиль</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">Выйти</a></li>
+                                <li>
+                                    <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item">Выйти</button>
+                                    </form>
+                                </li>
                             </ul>
                         </li>
                     {% else %}
@@ -201,6 +291,101 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% if user.is_authenticated %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationsDropdown = document.getElementById('notificationsDropdown');
+            const notificationsBadge = notificationsDropdown.querySelector('.notification-badge');
+            const notificationsContent = document.querySelector('.notifications-content');
+            let isLoading = false;
+
+            // Функция для загрузки уведомлений
+            function loadNotifications() {
+                if (isLoading) return;
+                isLoading = true;
+
+                fetch('{% url "notifications:get_notifications" %}')
+                    .then(response => response.json())
+                    .then(data => {
+                        notificationsContent.innerHTML = data.notifications_html;
+                        if (data.unread_count > 0) {
+                            notificationsBadge.textContent = data.unread_count;
+                            notificationsBadge.classList.remove('d-none');
+                        } else {
+                            notificationsBadge.classList.add('d-none');
+                        }
+                        isLoading = false;
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        isLoading = false;
+                    });
+            }
+
+            // Загружаем уведомления при открытии выпадающего списка
+            notificationsDropdown.addEventListener('show.bs.dropdown', loadNotifications);
+
+            // Обработчик клика по уведомлению
+            document.addEventListener('click', function(e) {
+                const notificationItem = e.target.closest('.notification-item');
+                if (notificationItem && !notificationItem.classList.contains('read')) {
+                    const notificationId = notificationItem.dataset.notificationId;
+                    
+                    fetch(`/notifications/${notificationId}/mark-read/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            notificationItem.classList.remove('unread');
+                            loadNotifications(); // Обновляем счетчик
+                        }
+                    });
+                }
+            });
+
+            // Обработчик кнопки "Отметить все как прочитанные"
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('mark-all-read')) {
+                    fetch('{% url "notifications:mark_all_read" %}', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            loadNotifications();
+                        }
+                    });
+                }
+            });
+
+            // Периодически проверяем новые уведомления
+            setInterval(loadNotifications, 30000); // Каждые 30 секунд
+
+            // Функция для получения CSRF-токена
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+    </script>
+    {% endif %}
     {% block extra_js %}{% endblock %}
 </body>
 </html> 

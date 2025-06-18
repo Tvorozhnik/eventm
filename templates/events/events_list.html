@@ -10,7 +10,25 @@
         <div class="col-md-3">
             <div class="filters-section">
                 <h3 class="h5 mb-4">Фильтры</h3>
-                <form method="get" class="filter-form">
+                <form method="get" class="filter-form" id="filter-form">
+                    <input type="hidden" name="page" value="1">
+                    {% if user.is_staff or user.is_superuser %}
+                    <div class="filter-group mb-4">
+                        <label class="filter-label">Статус</label>
+                        <div class="status-list">
+                            {% for status_value, status_label in statuses %}
+                            <div class="status-item">
+                                <input type="radio" class="filter-radio" name="status" value="{{ status_value }}" 
+                                       id="status-{{ status_value }}" {% if selected_status == status_value %}checked{% endif %}>
+                                <label class="filter-radio-label" for="status-{{ status_value }}">
+                                    {{ status_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <div class="filter-group mb-4">
                         <label class="filter-label">Актуальность</label>
                         <div class="relevance-list">
@@ -63,7 +81,7 @@
 
                     <div class="filter-group">
                         <div class="filter-buttons">
-                            <button type="reset" id="reset-filters" class="filter-reset">Сбросить</button>
+                            <button type="button" id="reset-filters" class="filter-reset">Сбросить</button>
                             <button type="submit" class="filter-submit">Применить</button>
                         </div>
                     </div>
@@ -76,7 +94,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="h3 mb-0">Мероприятия</h1>
                 <div class="d-flex gap-3 align-items-center">
-                    {% if user.is_authenticated %}
+                    {% if user.is_authenticated and user.is_staff %}
                     <a href="{% url 'events:events_create' %}" class="create-event-btn">
                         <i class="fas fa-plus"></i> Создать мероприятие
                     </a>
@@ -89,15 +107,18 @@
                 {% for event in events %}
                 <div class="col-md-4">
                     <div class="event-card">
-                        {% if event.image %}
-                        <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}">
-                        {% else %}
-                        <img src="{% static 'images/default-event.jpg' %}" class="card-img-top" alt="{{ event.title }}">
-                        {% endif %}
+                        <img src="{{ event.get_image_url }}" class="card-img-top" alt="{{ event.title }}">
                         <div class="card-body p-4">
-                            <span class="badge mb-2" style="background-color: {{ event.category.color }}; color: white;">
-                                {{ event.category.name }}
-                            </span>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge" style="background-color: {{ event.category.color }}; color: white;">
+                                    {{ event.category.name }}
+                                </span>
+                                {% if user.is_staff or user.is_superuser %}
+                                <span class="badge {% if event.status == 'published' %}bg-success{% elif event.status == 'moderation' %}bg-warning{% elif event.status == 'draft' %}bg-secondary{% else %}bg-danger{% endif %}">
+                                    {{ event.get_status_display }}
+                                </span>
+                                {% endif %}
+                            </div>
                             <h3 class="h5 mb-3">{{ event.title }}</h3>
                             <p class="text-muted mb-3">{{ event.description|truncatewords:20 }}</p>
                             <div class="d-flex justify-content-between align-items-center">
@@ -105,7 +126,15 @@
                                     <i class="fas fa-calendar"></i> {{ event.start_datetime|date:"d.m.Y" }}
                                     <i class="fas fa-clock ms-2"></i> {{ event.start_datetime|time:"H:i" }}
                                 </small>
-                                <a href="{% url 'events:events_detail' event.id %}" class="event-link">Подробнее</a>
+                                <div class="d-flex gap-2">
+                                    {% if user.is_authenticated and event.status == 'published' %}
+                                    <button class="btn btn-sm btn-outline-primary favorite-btn" data-event-id="{{ event.id }}"
+                                            {% if user in event.favorites.all %}data-is-favorite="true"{% endif %}>
+                                        <i class="fas {% if user in event.favorites.all %}fa-heart{% else %}fa-heart-o{% endif %}"></i>
+                                    </button>
+                                    {% endif %}
+                                    <a href="{% url 'events:events_detail' event.id %}" class="event-link">Подробнее</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -124,12 +153,12 @@
                 <ul class="pagination justify-content-center">
                     {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" aria-label="Первая">
+                        <a class="page-link" href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}page=1" aria-label="Первая">
                             <span aria-hidden="true">&laquo;&laquo;</span>
                         </a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" aria-label="Предыдущая">
+                        <a class="page-link" href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Предыдущая">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
@@ -142,19 +171,19 @@
                     </li>
                     {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">{{ num }}</a>
+                        <a class="page-link" href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}page={{ num }}">{{ num }}</a>
                     </li>
                     {% endif %}
                     {% endfor %}
 
                     {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" aria-label="Следующая">
+                        <a class="page-link" href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}page={{ page_obj.next_page_number }}" aria-label="Следующая">
                             <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" aria-label="Последняя">
+                        <a class="page-link" href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}page={{ page_obj.paginator.num_pages }}" aria-label="Последняя">
                             <span aria-hidden="true">&raquo;&raquo;</span>
                         </a>
                     </li>
@@ -206,7 +235,7 @@
         border-color: #000;
     }
 
-    .category-list, .relevance-list {
+    .category-list, .relevance-list, .status-list {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
@@ -214,7 +243,7 @@
         align-items: flex-start;
     }
 
-    .category-item, .relevance-item {
+    .category-item, .relevance-item, .status-item {
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -233,10 +262,14 @@
         background-color: #e0e0e0;
         cursor: pointer;
         position: relative;
-        transition: all 1s;
+        transition: all 0.2s;
         margin: 0;
         padding: 0;
         border-radius: 4px;
+    }
+
+    .filter-radio {
+        border-radius: 50%;
     }
 
     .filter-checkbox:active, .filter-radio:active {
@@ -248,92 +281,60 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -50%);
-        width: 16px;
-        height: 16px;
-        background-color: #e0e0e0;
-        border-radius: 4px;
-        transition: all 1s;
-    }
-
-    .filter-checkbox:active::before, .filter-radio:active::before {
-        background-color: #d0d0d0;
-    }
-
-    .filter-checkbox:checked::after {
-        content: '';
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%) rotate(45deg);
-        width: 4px;
+        transform: translate(-50%, -50%) scale(0);
+        width: 8px;
         height: 8px;
-        border: solid #000;
-        border-width: 0 1.5px 1.5px 0;
-        z-index: 1;
+        background-color: #000;
+        transition: transform 0.2s;
     }
 
-    .filter-radio:checked::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 11px;
-        height: 11px;
-        background-color: #000;
-        border-radius: 4px;
+    .filter-radio::before {
+        border-radius: 50%;
+    }
+
+    .filter-checkbox:checked::before, .filter-radio:checked::before {
+        transform: translate(-50%, -50%) scale(1);
     }
 
     .filter-checkbox-label, .filter-radio-label {
         font-size: 0.875rem;
         color: #000;
         cursor: pointer;
-        font-weight: 700;
-        transition: color 0.2s;
-        line-height: 24px;
         margin: 0;
-        padding: 0;
-    }
-
-    .filter-checkbox-label:hover, .filter-radio-label:hover {
-        color: #666;
     }
 
     .filter-buttons {
         display: flex;
-        gap: 0;
-        margin-top: 1rem;
+        gap: 1rem;
+        margin-top: 2rem;
     }
 
-    .filter-submit, .filter-reset {
+    .filter-reset, .filter-submit {
         flex: 1;
-        padding: 0.5rem;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
         font-size: 0.875rem;
         cursor: pointer;
-        border: 1px solid #000;
+        transition: background-color 0.2s;
+    }
+
+    .filter-reset {
+        background-color: #f5f5f5;
+        color: #000;
     }
 
     .filter-submit {
         background-color: #000;
-        color: white;
-        border-left: none;
-        border-radius: 0 4px 4px 0;
-    }
-
-    .filter-reset {
-        background-color: white;
-        color: #000;
-        border-radius: 4px 0 0 4px;
-    }
-
-    .filter-submit:hover {
-        background-color: #000;
-        opacity: 0.9;
+        color: #fff;
     }
 
     .filter-reset:hover {
-        background-color: #f8f8f8;
+        background-color: #e0e0e0;
+    }
+
+    .filter-submit:hover {
+        background-color: #333;
     }
 
     .per-page-select {
@@ -341,20 +342,25 @@
         padding: 0.5rem;
         border: 1px solid #e0e0e0;
         border-radius: 4px;
-        background-color: white;
+        background-color: #fff;
         font-size: 0.875rem;
-        color: #333;
-        cursor: pointer;
-        transition: all 0.3s;
+        color: #000;
     }
 
-    .per-page-select:hover {
-        border-color: #000;
+    .favorite-btn {
+        padding: 0.25rem 0.5rem;
+        border: 1px solid #e0e0e0;
+        background-color: transparent;
+        transition: all 0.2s;
     }
 
-    .per-page-select:focus {
-        outline: none;
-        border-color: #000;
+    .favorite-btn[data-is-favorite="true"] {
+        color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .favorite-btn:hover {
+        background-color: #f8f9fa;
     }
 
     .create-event-btn {
@@ -461,47 +467,33 @@
     }
 </style>
 
-<!-- Подключаем необходимые скрипты -->
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
-<script src="{% static 'js/custom_filters.js' %}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const filterForm = document.querySelector('.filter-form');
-        const resetButton = document.querySelector('.filter-reset');
-        const perPageSelect = document.querySelector('.per-page-select');
-        const dateInput = document.querySelector('input[type="date"]');
-        const categoryCheckboxes = document.querySelectorAll('input[name="category"]');
-        const relevanceRadios = document.querySelectorAll('input[name="relevance"]');
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filter-form');
+    const resetButton = document.getElementById('reset-filters');
 
-        // Обработчик изменения количества элементов на странице
-        perPageSelect.addEventListener('change', function() {
-            filterForm.submit();
-        });
-
-        // Обработчик сброса фильтров
-        resetButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Сбрасываем дату
-            if (dateInput) dateInput.value = '';
-            
-            // Сбрасываем чекбоксы категорий
-            categoryCheckboxes.forEach(checkbox => {
-                checkbox.checked = false;
-            });
-            
-            // Сбрасываем радио-кнопки актуальности
-            relevanceRadios.forEach(radio => {
-                radio.checked = false;
-            });
-            
-            // Сбрасываем селект количества элементов
-            if (perPageSelect) perPageSelect.value = '12';
-            
-            // Отправляем форму
-            filterForm.submit();
-        });
+    resetButton.addEventListener('click', function() {
+        // Очищаем все поля формы
+        filterForm.reset();
+        
+        // Устанавливаем значение страницы в 1
+        const pageInput = filterForm.querySelector('input[name="page"]');
+        if (pageInput) {
+            pageInput.value = '1';
+        }
+        
+        // Отправляем форму
+        filterForm.submit();
     });
+
+    // При изменении количества элементов на странице
+    document.getElementById('per-page').addEventListener('change', function() {
+        const pageInput = filterForm.querySelector('input[name="page"]');
+        if (pageInput) {
+            pageInput.value = '1';
+        }
+        filterForm.submit();
+    });
+});
 </script>
 {% endblock %} 

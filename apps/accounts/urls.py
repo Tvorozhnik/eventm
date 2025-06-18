@@ -5,6 +5,7 @@ from .views import (
     RegisterView,
     ProfileView,
     ProfileEditView,
+    OrganizedEventsListView
 )
 
 app_name = 'accounts'
@@ -15,4 +16,5 @@ urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('profile/', ProfileView.as_view(), name='profile'),
     path('profile/edit/', ProfileEditView.as_view(), name='profile_edit'),
+    path('profile/organized-events/', OrganizedEventsListView.as_view(), name='organized_events'),
 ] 

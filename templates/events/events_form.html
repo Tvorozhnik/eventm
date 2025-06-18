@@ -50,21 +50,12 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-4">
+                            <div class="col-md-12 mb-4">
                                 <label for="{{ form.start_datetime.id_for_label }}" class="form-label">Дата и время начала</label>
                                 {{ form.start_datetime }}
                                 {% if form.start_datetime.errors %}
                                 <div class="invalid-feedback d-block">
                                     {{ form.start_datetime.errors }}
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <label for="{{ form.end_datetime.id_for_label }}" class="form-label">Дата и время окончания</label>
-                                {{ form.end_datetime }}
-                                {% if form.end_datetime.errors %}
-                                <div class="invalid-feedback d-block">
-                                    {{ form.end_datetime.errors }}
                                 </div>
                                 {% endif %}
                             </div>
@@ -97,21 +88,31 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="{{ form.additional_info.id_for_label }}" class="form-label">Дополнительная информация</label>
-                            {{ form.additional_info }}
-                            {% if form.additional_info.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.additional_info.errors }}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-4">
                             <label for="{{ form.max_participants.id_for_label }}" class="form-label">Максимальное количество участников</label>
                             {{ form.max_participants }}
                             {% if form.max_participants.errors %}
                             <div class="invalid-feedback d-block">
                                 {{ form.max_participants.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.price.id_for_label }}" class="form-label">Цена (руб.)</label>
+                            {{ form.price }}
+                            {% if form.price.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.price.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.status.id_for_label }}" class="form-label">Статус</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.status.errors }}
                             </div>
                             {% endif %}
                         </div>
@@ -123,6 +124,14 @@
                         <h3 class="h5 mb-4">Изображение</h3>
                         
                         <div class="mb-4">
+                            <div class="image-preview-container mb-3">
+                                <img src="{{ event.get_image_url }}" 
+                                     alt="Предпросмотр изображения" 
+                                     id="image-preview" 
+                                     class="img-fluid" 
+                                     style="max-height: 200px; object-fit: contain;">
+                            </div>
+
                             <label for="{{ form.image.id_for_label }}" class="form-label">Изображение мероприятия</label>
                             {{ form.image }}
                             {% if form.image.errors %}
@@ -130,14 +139,17 @@
                                 {{ form.image.errors }}
                             </div>
                             {% endif %}
-                        </div>
+                            <div class="form-text">Рекомендуемый размер: 1200x600 пикселей</div>
 
-                        {% if form.instance.image %}
-                        <div class="current-image mb-4">
-                            <p class="text-muted mb-2">Текущее изображение:</p>
-                            <img src="{{ form.instance.image.url }}" class="img-fluid" alt="Текущее изображение" style="max-height: 200px;">
+                            {% if form.instance.image %}
+                            <div class="form-check mt-2">
+                                <input type="checkbox" name="image-clear" id="image-clear" class="form-check-input">
+                                <label class="form-check-label" for="image-clear">
+                                    Удалить текущее изображение
+                                </label>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
                     </div>
                 </div>
 
@@ -202,9 +214,16 @@
         border-radius: 0;
     }
 
-    .current-image img {
-        border-radius: 0;
-        object-fit: cover;
+    .image-preview-container {
+        text-align: center;
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border: 1px dashed #dee2e6;
+    }
+
+    .image-preview-container img {
+        max-width: 100%;
+        height: auto;
     }
 
     .invalid-feedback {
@@ -217,21 +236,54 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Инициализация datetime picker
         const startDateTimeInput = document.getElementById('{{ form.start_datetime.id_for_label }}');
-        const endDateTimeInput = document.getElementById('{{ form.end_datetime.id_for_label }}');
+        const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+        const imagePreview = document.getElementById('image-preview');
+        const imageClear = document.getElementById('image-clear');
+        const defaultImageUrl = "{% static 'images/event-default.jpg' %}";
 
-        if (startDateTimeInput && endDateTimeInput) {
+        if (startDateTimeInput) {
             flatpickr(startDateTimeInput, {
                 enableTime: true,
                 dateFormat: "Y-m-d H:i",
                 locale: "ru",
                 minDate: "today"
             });
+        }
 
-            flatpickr(endDateTimeInput, {
-                enableTime: true,
-                dateFormat: "Y-m-d H:i",
-                locale: "ru",
-                minDate: "today"
+        // Функция для предпросмотра изображения
+        function previewImage(file) {
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    if (imageClear) {
+                        imageClear.checked = false;
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Обработчик изменения файла
+        if (imageInput) {
+            imageInput.addEventListener('change', function(e) {
+                if (this.files && this.files[0]) {
+                    previewImage(this.files[0]);
+                }
+            });
+        }
+
+        // Обработчик удаления изображения
+        if (imageClear) {
+            imageClear.addEventListener('change', function() {
+                if (this.checked) {
+                    imagePreview.src = defaultImageUrl;
+                    if (imageInput) {
+                        imageInput.value = '';
+                    }
+                } else {
+                    imagePreview.src = "{{ event.get_image_url }}";
+                }
             });
         }
     });

@@ -97,12 +97,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'eventmaster_db',
-        'USER': 'postgres',
-        'PASSWORD': '',
-        'HOST': 'localhost',  # или IP адрес сервера базы данных
-        'PORT': '5432',  # стандартный порт PostgreSQL
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

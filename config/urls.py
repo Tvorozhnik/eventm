@@ -17,7 +17,7 @@ Including another URLconf
 from django.urls import include, path
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from apps.accounts.views import RegisterView, ProfileView, ProfileEditView, CustomLoginView, logout_view
+from apps.accounts.views import RegisterView, ProfileView, ProfileEditView, CustomLoginView
 from apps.events.views import HomeView
 #from apps.events.views import EventListView, EventDetailView, CalendarView, calendar_events
 from django.conf import settings
@@ -34,6 +34,7 @@ urlpatterns = [
     # Приложения
     path('accounts/', include('apps.accounts.urls')),
     path('events/', include('apps.events.urls')),
+    path('notifications/', include('apps.notifications.urls')),
 ]
 
 if settings.DEBUG:

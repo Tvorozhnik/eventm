@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2">Уведомления</h1>
+                {% if notifications %}
+                <form action="{% url 'notifications:mark_all_read' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-primary">
+                        Отметить все как прочитанные
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            {% if notifications %}
+                <div class="notifications-list">
+                    {% for notification in notifications %}
+                        <div class="card mb-3 {% if not notification.is_read %}notification-unread{% endif %}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="card-title mb-2">{{ notification.title }}</h5>
+                                        <p class="card-text">{{ notification.message }}</p>
+                                        <small class="text-muted">{{ notification.created_at|date:"d.m.Y H:i" }}</small>
+                                    </div>
+                                    {% if not notification.is_read %}
+                                        <form action="{% url 'notifications:mark_notification_read' notification.pk %}" method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                                Отметить как прочитанное
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {% if page_obj.has_other_pages %}
+                    <nav aria-label="Навигация по страницам" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперед</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info">
+                    У вас пока нет уведомлений.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .notification-unread {
+        border-left: 4px solid var(--primary);
+        background-color: var(--light);
+    }
+
+    .notifications-list .card {
+        transition: all 0.3s ease;
+    }
+
+    .notifications-list .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-link {
+        color: var(--primary);
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработка отметки уведомления как прочитанного
+    document.querySelectorAll('form[action*="mark-notification-read"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const card = form.closest('.card');
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    card.classList.remove('notification-unread');
+                    form.remove();
+                }
+            });
+        });
+    });
+
+    // Обработка отметки всех уведомлений как прочитанных
+    const markAllForm = document.querySelector('form[action*="mark-all-read"]');
+    if (markAllForm) {
+        markAllForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(markAllForm);
+
+            fetch(markAllForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.querySelectorAll('.notification-unread').forEach(card => {
+                        card.classList.remove('notification-unread');
+                        card.querySelector('form[action*="mark-notification-read"]')?.remove();
+                    });
+                    markAllForm.remove();
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %} 

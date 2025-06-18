@@ -249,4 +249,19 @@ footer p {
     h1 { font-size: 1.8rem; }
     h2 { font-size: 1.5rem; }
     h3 { font-size: 1.3rem; }
+}
+
+.avatar-container {
+    background-color: #f8f9fa;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 } 
