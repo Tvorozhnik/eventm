@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Основная информация о мероприятии -->
+        <div class="col-lg-8">
+            <div class="event-header mb-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="badge mb-2" style="background-color: {{ event.category.color }}; color: white;">
+                            {{ event.category.name }}
+                        </span>
+                        <h1 class="h2 mb-3">{{ event.title }}</h1>
+                    </div>
+                    {% if user.is_authenticated and event.organizer == user %}
+                    <div class="dropdown">
+                        <button class="btn btn-link text-dark p-0" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'events:events_update' event.id %}">Редактировать</a></li>
+                            <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteEventModal">Удалить</a></li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="event-meta mb-4">
+                    <div class="d-flex gap-4">
+                        <div>
+                            <i class="fas fa-calendar"></i>
+                            <span>{{ event.start_datetime|date:"d.m.Y" }}</span>
+                        </div>
+                        <div>
+                            <i class="fas fa-clock"></i>
+                            <span>{{ event.start_datetime|time:"H:i" }}</span>
+                        </div>
+                        <div>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ event.location }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if event.image %}
+                <div class="event-image mb-4">
+                    <img src="{{ event.image.url }}" class="img-fluid w-100" alt="{{ event.title }}">
+                </div>
+                {% endif %}
+
+                <div class="event-description mb-4">
+                    {{ event.description|linebreaks }}
+                </div>
+
+                {% if event.additional_info %}
+                <div class="event-additional-info mb-4">
+                    <h3 class="h5 mb-3">Дополнительная информация</h3>
+                    {{ event.additional_info|linebreaks }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Боковая панель -->
+        <div class="col-lg-4">
+            <div class="event-sidebar">
+                <!-- Статус регистрации -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="h5 mb-3">Регистрация</h3>
+                        {% if event.is_registration_open %}
+                            {% if user.is_authenticated %}
+                                {% if is_registered %}
+                                    <div class="alert alert-success mb-3">
+                                        Вы зарегистрированы на это мероприятие
+                                    </div>
+                                    <form method="post" action="{% url 'events:events_unregister' event.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger w-100">Отменить регистрацию</button>
+                                    </form>
+                                {% else %}
+                                    <form method="post" action="{% url 'events:events_register' event.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                                    </form>
+                                {% endif %}
+                            {% else %}
+                                <p class="text-muted mb-3">Для регистрации необходимо войти в систему</p>
+                                <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="btn btn-primary w-100">Войти</a>
+                            {% endif %}
+                        {% else %}
+                            <div class="alert alert-warning">
+                                Регистрация закрыта
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Информация об организаторе -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="h5 mb-3">Организатор</h3>
+                        <div class="d-flex align-items-center">
+                            {% if event.organizer.profile.avatar %}
+                                <img src="{{ event.organizer.profile.avatar.url }}" class="rounded-circle me-3" width="50" height="50" alt="{{ event.organizer.username }}">
+                            {% else %}
+                                <img src="{% static 'images/default-avatar.png' %}" class="rounded-circle me-3" width="50" height="50" alt="{{ event.organizer.username }}">
+                            {% endif %}
+                            <div>
+                                <h4 class="h6 mb-1">{{ event.organizer.get_full_name|default:event.organizer.username }}</h4>
+                                <p class="text-muted mb-0">{{ event.organizer.profile.bio|default:"Нет информации" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Участники -->
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="h5 mb-3">Участники ({{ event.registered_users.count }})</h3>
+                        <div class="participants-list">
+                            {% for user in event.registered_users.all %}
+                            <div class="d-flex align-items-center mb-3">
+                                {% if user.profile.avatar %}
+                                    <img src="{{ user.profile.avatar.url }}" class="rounded-circle me-2" width="40" height="40" alt="{{ user.username }}">
+                                {% else %}
+                                    <img src="{% static 'images/default-avatar.png' %}" class="rounded-circle me-2" width="40" height="40" alt="{{ user.username }}">
+                                {% endif %}
+                                <div>
+                                    <h4 class="h6 mb-0">{{ user.get_full_name|default:user.username }}</h4>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <p class="text-muted">Пока нет зарегистрированных участников</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+{% if user.is_authenticated and event.organizer == user %}
+<div class="modal fade" id="deleteEventModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить мероприятие "{{ event.title }}"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form method="post" action="{% url 'events:events_delete' event.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    .event-header {
+        background-color: white;
+        padding: 2rem;
+    }
+
+    .event-meta {
+        color: var(--gray-color);
+    }
+
+    .event-meta i {
+        margin-right: 0.5rem;
+    }
+
+    .event-image img {
+        border-radius: 0;
+        object-fit: cover;
+        height: 400px;
+    }
+
+    .event-description {
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+    .event-sidebar .card {
+        border-radius: 0;
+        border: 1px solid var(--border-color);
+    }
+
+    .event-sidebar .card-body {
+        padding: 1.5rem;
+    }
+
+    .participants-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .modal-content {
+        border-radius: 0;
+    }
+
+    .btn {
+        border-radius: 0;
+    }
+
+    .dropdown-menu {
+        border-radius: 0;
+        border: 1px solid var(--border-color);
+    }
+
+    .dropdown-item:hover {
+        background-color: var(--hover-color);
+    }
+</style>
+{% endblock %}

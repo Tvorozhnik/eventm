@@ -1,0 +1,286 @@
+/* Стили для фильтров */
+.filters-section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filters-section h5 {
+    color: var(--modern-black);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    border-bottom: 2px solid var(--modern-border);
+    padding-bottom: 0.75rem;
+}
+
+.filter-group {
+    margin-bottom: 20px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.filter-group select,
+.filter-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--modern-border);
+    background-color: var(--modern-white);
+    color: var(--modern-black);
+    font-size: 1rem;
+    border-radius: 0;
+    transition: all 0.3s ease;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: var(--modern-black);
+}
+
+.filter-group select option {
+    background-color: var(--modern-white);
+    color: var(--modern-black);
+    padding: 0.5rem;
+}
+
+.filter-buttons {
+    margin-top: 24px;
+}
+
+.filter-buttons .btn {
+    margin-bottom: 8px;
+}
+
+/* Стили для календаря в фильтрах */
+#calendar {
+    margin-bottom: 16px;
+}
+
+.fc .fc-toolbar {
+    margin-bottom: 1em !important;
+}
+
+.fc .fc-button {
+    padding: 0.4em 0.65em;
+    font-size: 0.9em;
+}
+
+.fc .fc-button-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.fc .fc-button-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.fc .fc-button-primary:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.fc .fc-daygrid-day.selected {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .filters-section {
+        margin-bottom: 20px;
+    }
+    
+    .filter-group {
+        margin-bottom: 16px;
+    }
+    
+    .filter-buttons {
+        margin-top: 16px;
+    }
+}
+
+.filter-card {
+    background-color: var(--construct-white);
+    border: 2px solid var(--construct-black);
+    box-shadow: 4px 4px 0 var(--construct-black);
+}
+
+.card-title {
+    color: var(--construct-black);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--construct-black);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.category-filters {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 5px;
+    border: 1px solid var(--construct-black);
+    margin-bottom: 1rem;
+}
+
+.category-filters::-webkit-scrollbar {
+    width: 4px;
+}
+
+.category-filters::-webkit-scrollbar-track {
+    background: var(--construct-white);
+}
+
+.category-filters::-webkit-scrollbar-thumb {
+    background: var(--construct-black);
+}
+
+.category-filters::-webkit-scrollbar-thumb:hover {
+    background: var(--construct-red);
+}
+
+.category-dot {
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--construct-black);
+    display: inline-block;
+}
+
+.date-range {
+    margin-top: 1rem;
+    border: 1px solid var(--construct-black);
+    padding: 1rem;
+}
+
+.date-range .form-control {
+    border: 2px solid var(--construct-black);
+    border-radius: 0;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+}
+
+.date-range .form-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--construct-black);
+    margin-bottom: 0.25rem;
+}
+
+.btn {
+    border-radius: 0;
+    text-transform: uppercase;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    padding: 8px 16px;
+    border: 2px solid var(--construct-black);
+    box-shadow: 2px 2px 0 var(--construct-black);
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--construct-black);
+}
+
+.btn-primary {
+    background-color: var(--construct-red);
+    border-color: var(--construct-black);
+}
+
+.btn-primary:hover {
+    background-color: var(--construct-black);
+    border-color: var(--construct-black);
+}
+
+.btn-outline-secondary {
+    color: var(--construct-black);
+    border-color: var(--construct-black);
+    background-color: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--construct-black);
+    border-color: var(--construct-black);
+    color: var(--construct-white);
+}
+
+.filter-block {
+    background: var(--tdp-white);
+    border: 1px solid var(--tdp-border);
+    border-radius: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 1.5rem 1rem;
+    margin-bottom: 2rem;
+    max-width: 260px;
+}
+
+.filter-block label {
+    font-weight: 700;
+    color: var(--tdp-black);
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+.filter-block .form-check {
+    margin-bottom: 0.5rem;
+}
+
+.filter-block .form-check-input {
+    border-radius: 0;
+    border: 2px solid var(--tdp-border);
+    background: var(--tdp-white);
+    width: 1.1em;
+    height: 1.1em;
+    margin-top: 0.2em;
+    transition: border 0.2s;
+}
+
+.filter-block .form-check-input:checked {
+    background-color: var(--tdp-accent);
+    border-color: var(--tdp-accent);
+}
+
+.filter-block .form-check-label {
+    color: var(--tdp-text);
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-left: 0.5em;
+}
+
+.filter-block .btn {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.filter-block .form-control {
+    border-radius: 0;
+    border: 2px solid var(--tdp-border);
+    font-size: 0.95rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.filter-block .form-control:focus {
+    border-color: var(--tdp-black);
+    box-shadow: none;
+}
+
+@media (max-width: 600px) {
+    .filter-block {
+        max-width: 98vw;
+        padding: 1rem 0.5rem;
+    }
+} 

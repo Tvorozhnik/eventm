@@ -1,0 +1,252 @@
+:root {
+    --tdp-black: #000000;
+    --tdp-white: #ffffff;
+    --tdp-gray: #f5f5f5;
+    --tdp-accent: #e63946;
+    --tdp-text: #333333;
+    --tdp-border: #e0e0e0;
+}
+
+body {
+    background-color: var(--tdp-white);
+    color: var(--tdp-text);
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+}
+
+/* Навигация */
+.navbar {
+    background-color: var(--tdp-white) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    color: #4F46E5 !important;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+}
+
+.nav-link {
+    color: #4B5563 !important;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #4F46E5 !important;
+}
+
+/* Плавные переходы для всех элементов */
+* {
+    transition: background 0.3s, color 0.3s, border 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+/* Fade-in анимация */
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Карточки с эффектом наведения */
+.card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    font-weight: 600;
+    color: #1F2937;
+}
+
+.card-text {
+    color: #6B7280;
+}
+
+/* Кнопки с плавным эффектом */
+.btn, .btn-primary, .btn-outline-primary {
+    transition: background 0.3s, color 0.3s, border 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn-primary {
+    background-color: #4F46E5;
+    border-color: #4F46E5;
+    color: var(--tdp-white);
+}
+
+.btn-primary:hover {
+    background-color: #4338CA;
+    border-color: #4338CA;
+    color: var(--tdp-white);
+}
+
+.btn-outline-primary {
+    color: #4F46E5;
+    border-color: #4F46E5;
+    background-color: transparent;
+}
+
+.btn-outline-primary:hover {
+    background-color: #4F46E5;
+    border-color: #4F46E5;
+    color: var(--tdp-white);
+}
+
+/* Ссылки */
+a, .nav-link {
+    transition: color 0.3s, border 0.3s;
+}
+
+a:hover, .nav-link:hover {
+    color: var(--tdp-accent) !important;
+}
+
+/* Фильтры */
+.filter-block, .form-control {
+    transition: box-shadow 0.3s, border 0.3s, background 0.3s;
+}
+
+.filter-block:focus-within {
+    box-shadow: 0 0 0 2px var(--tdp-accent);
+}
+
+/* Заголовки */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    color: var(--tdp-black);
+    margin-bottom: 1.5rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    letter-spacing: 1px;
+}
+
+h2 {
+    font-size: 2rem;
+    letter-spacing: 0.5px;
+}
+
+h3 {
+    font-size: 1.75rem;
+}
+
+/* Формы */
+.form-control {
+    border-radius: 0;
+    border: 2px solid var(--tdp-border);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--tdp-black);
+    box-shadow: none;
+}
+
+/* Бейджи */
+.badge {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    border-radius: 20px;
+}
+
+.badge.bg-primary {
+    background-color: var(--tdp-black) !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--tdp-accent) !important;
+}
+
+/* Алерты */
+.alert {
+    border-radius: 0;
+    border: none;
+    padding: 1rem;
+}
+
+.alert-info {
+    background-color: var(--tdp-gray);
+    color: var(--tdp-text);
+}
+
+/* Футер */
+footer {
+    background-color: #F9FAFB;
+    color: var(--tdp-text);
+    padding: 3rem 0;
+    margin-top: 4rem;
+}
+
+footer h5 {
+    font-weight: 600;
+    color: #1F2937;
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+footer p {
+    color: #6B7280;
+    font-size: 0.95rem;
+}
+
+/* Контейнеры */
+.container-fluid {
+    padding: 2rem;
+}
+
+/* Сетка */
+.row {
+    margin: -0.5rem;
+}
+
+.col, [class*="col-"] {
+    padding: 0.5rem;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 1rem;
+    }
+    
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.3rem; }
+} 

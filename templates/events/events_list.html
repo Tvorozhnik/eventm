@@ -1,0 +1,507 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Мероприятия{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Фильтры -->
+        <div class="col-md-3">
+            <div class="filters-section">
+                <h3 class="h5 mb-4">Фильтры</h3>
+                <form method="get" class="filter-form">
+                    <div class="filter-group mb-4">
+                        <label class="filter-label">Актуальность</label>
+                        <div class="relevance-list">
+                            <div class="relevance-item">
+                                <input type="radio" class="filter-radio" name="relevance" value="upcoming" id="relevance-upcoming"
+                                       {% if selected_relevance == 'upcoming' %}checked{% endif %}>
+                                <label class="filter-radio-label" for="relevance-upcoming">
+                                    Предстоящие
+                                </label>
+                            </div>
+                            <div class="relevance-item">
+                                <input type="radio" class="filter-radio" name="relevance" value="past" id="relevance-past"
+                                       {% if selected_relevance == 'past' %}checked{% endif %}>
+                                <label class="filter-radio-label" for="relevance-past">
+                                    Прошедшие
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-group mb-4">
+                        <label for="selected-date" class="filter-label">Дата</label>
+                        <input type="date" class="filter-input" id="selected-date" name="selected-date" value="{{ selected_date }}">
+                    </div>
+
+                    <div class="filter-group mb-4">
+                        <label class="filter-label">Категории</label>
+                        <div class="category-list">
+                            {% for category in categories %}
+                            <div class="category-item">
+                                <input type="checkbox" class="filter-checkbox" name="category" value="{{ category.id }}" id="category-{{ category.id }}"
+                                       {% if category.id|stringformat:"i" in selected_categories %}checked{% endif %}>
+                                <label class="filter-checkbox-label" for="category-{{ category.id }}">
+                                    {{ category.name }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="per-page">Показывать по:</label>
+                        <select name="per_page" id="per-page" class="per-page-select">
+                            <option value="12" {% if per_page == 12 %}selected{% endif %}>12</option>
+                            <option value="24" {% if per_page == 24 %}selected{% endif %}>24</option>
+                            <option value="36" {% if per_page == 36 %}selected{% endif %}>36</option>
+                            <option value="48" {% if per_page == 48 %}selected{% endif %}>48</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <div class="filter-buttons">
+                            <button type="reset" id="reset-filters" class="filter-reset">Сбросить</button>
+                            <button type="submit" class="filter-submit">Применить</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Список мероприятий -->
+        <div class="col-md-9" id="events-list-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Мероприятия</h1>
+                <div class="d-flex gap-3 align-items-center">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'events:events_create' %}" class="create-event-btn">
+                        <i class="fas fa-plus"></i> Создать мероприятие
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Список мероприятий -->
+            <div class="row g-4">
+                {% for event in events %}
+                <div class="col-md-4">
+                    <div class="event-card">
+                        {% if event.image %}
+                        <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}">
+                        {% else %}
+                        <img src="{% static 'images/default-event.jpg' %}" class="card-img-top" alt="{{ event.title }}">
+                        {% endif %}
+                        <div class="card-body p-4">
+                            <span class="badge mb-2" style="background-color: {{ event.category.color }}; color: white;">
+                                {{ event.category.name }}
+                            </span>
+                            <h3 class="h5 mb-3">{{ event.title }}</h3>
+                            <p class="text-muted mb-3">{{ event.description|truncatewords:20 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i> {{ event.start_datetime|date:"d.m.Y" }}
+                                    <i class="fas fa-clock ms-2"></i> {{ event.start_datetime|time:"H:i" }}
+                                </small>
+                                <a href="{% url 'events:events_detail' event.id %}" class="event-link">Подробнее</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="no-events-message">
+                        Мероприятия не найдены
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if is_paginated %}
+            <nav aria-label="Навигация по страницам" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" aria-label="Первая">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" aria-label="Предыдущая">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" aria-label="Следующая">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}" aria-label="Последняя">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .filters-section {
+        background-color: #fff;
+        padding: 1.25rem;
+        border: none;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .filter-group label {
+        display: block;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .filter-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #000;
+        margin-bottom: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .filter-input {
+        width: 100%;
+        padding: 0.5rem 0;
+        border: none;
+        border-bottom: 1px solid #e0e0e0;
+        background-color: transparent;
+        font-size: 0.875rem;
+        color: #000;
+        transition: border-color 0.2s;
+    }
+
+    .filter-input:focus {
+        outline: none;
+        border-color: #000;
+    }
+
+    .category-list, .relevance-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        align-items: flex-start;
+    }
+
+    .category-item, .relevance-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: auto;
+        height: 24px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .filter-checkbox, .filter-radio {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        border: 1px solid #e0e0e0;
+        background-color: #e0e0e0;
+        cursor: pointer;
+        position: relative;
+        transition: all 1s;
+        margin: 0;
+        padding: 0;
+        border-radius: 4px;
+    }
+
+    .filter-checkbox:active, .filter-radio:active {
+        transform: scale(1.2);
+    }
+
+    .filter-checkbox::before, .filter-radio::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 16px;
+        height: 16px;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        transition: all 1s;
+    }
+
+    .filter-checkbox:active::before, .filter-radio:active::before {
+        background-color: #d0d0d0;
+    }
+
+    .filter-checkbox:checked::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(45deg);
+        width: 4px;
+        height: 8px;
+        border: solid #000;
+        border-width: 0 1.5px 1.5px 0;
+        z-index: 1;
+    }
+
+    .filter-radio:checked::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 11px;
+        height: 11px;
+        background-color: #000;
+        border-radius: 4px;
+    }
+
+    .filter-checkbox-label, .filter-radio-label {
+        font-size: 0.875rem;
+        color: #000;
+        cursor: pointer;
+        font-weight: 700;
+        transition: color 0.2s;
+        line-height: 24px;
+        margin: 0;
+        padding: 0;
+    }
+
+    .filter-checkbox-label:hover, .filter-radio-label:hover {
+        color: #666;
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0;
+        margin-top: 1rem;
+    }
+
+    .filter-submit, .filter-reset {
+        flex: 1;
+        padding: 0.5rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        border: 1px solid #000;
+    }
+
+    .filter-submit {
+        background-color: #000;
+        color: white;
+        border-left: none;
+        border-radius: 0 4px 4px 0;
+    }
+
+    .filter-reset {
+        background-color: white;
+        color: #000;
+        border-radius: 4px 0 0 4px;
+    }
+
+    .filter-submit:hover {
+        background-color: #000;
+        opacity: 0.9;
+    }
+
+    .filter-reset:hover {
+        background-color: #f8f8f8;
+    }
+
+    .per-page-select {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        background-color: white;
+        font-size: 0.875rem;
+        color: #333;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .per-page-select:hover {
+        border-color: #000;
+    }
+
+    .per-page-select:focus {
+        outline: none;
+        border-color: #000;
+    }
+
+    .create-event-btn {
+        padding: 0.75rem 1.5rem;
+        background-color: #000;
+        color: white;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .create-event-btn:hover {
+        background-color: #333;
+        color: white;
+    }
+
+    .event-card {
+        background-color: white;
+        border: none;
+        transition: transform 0.2s;
+    }
+
+    .event-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .event-card .card-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .event-link {
+        color: #000;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: color 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .event-link:hover {
+        color: #666;
+    }
+
+    .no-events-message {
+        text-align: center;
+        padding: 2rem;
+        background-color: #fff;
+        color: #000;
+        font-size: 0.875rem;
+        border: 1px solid #e0e0e0;
+    }
+
+    .pagination {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .pagination .page-item {
+        margin: 0;
+    }
+
+    .pagination .page-link {
+        color: #000;
+        border: 1px solid #e0e0e0;
+        background-color: #e0e0e0;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+        border-radius: 3px;
+        transition: all 0.2s;
+        min-width: 2.5rem;
+        text-align: center;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #000;
+        color: white;
+        border-color: #000;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #d0d0d0;
+        border-color: #666;
+        color: #000;
+    }
+
+    .pagination .page-item.active .page-link:hover {
+        background-color: #333;
+        border-color: #333;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        background-color: #f8f8f8;
+        border-color: #e0e0e0;
+        color: #999;
+        cursor: not-allowed;
+    }
+</style>
+
+<!-- Подключаем необходимые скрипты -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
+<script src="{% static 'js/custom_filters.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.querySelector('.filter-form');
+        const resetButton = document.querySelector('.filter-reset');
+        const perPageSelect = document.querySelector('.per-page-select');
+        const dateInput = document.querySelector('input[type="date"]');
+        const categoryCheckboxes = document.querySelectorAll('input[name="category"]');
+        const relevanceRadios = document.querySelectorAll('input[name="relevance"]');
+
+        // Обработчик изменения количества элементов на странице
+        perPageSelect.addEventListener('change', function() {
+            filterForm.submit();
+        });
+
+        // Обработчик сброса фильтров
+        resetButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Сбрасываем дату
+            if (dateInput) dateInput.value = '';
+            
+            // Сбрасываем чекбоксы категорий
+            categoryCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            // Сбрасываем радио-кнопки актуальности
+            relevanceRadios.forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Сбрасываем селект количества элементов
+            if (perPageSelect) perPageSelect.value = '12';
+            
+            // Отправляем форму
+            filterForm.submit();
+        });
+    });
+</script>
+{% endblock %} 

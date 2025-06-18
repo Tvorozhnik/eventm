@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'events/css/events.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="event-detail">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="event-header">
+        <h1>{{ event.title }}</h1>
+        <div class="event-actions">
+            {% if user.is_authenticated %}
+            <button class="favorite-button {% if user in event.favorites.all %}active{% endif %}" 
+                    data-event-id="{{ event.id }}">
+                <i class="{% if user in event.favorites.all %}fas{% else %}far{% endif %} fa-heart"></i>
+            </button>
+            {% endif %}
+            
+            {% if user.is_staff or user.is_superuser or user == event.organizer %}
+            <div class="admin-actions">
+                <a href="{% url 'events:events_update' event.id %}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Редактировать
+                </a>
+                <a href="{% url 'events:events_delete' event.id %}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Удалить
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if event.image %}
+    <div class="event-image">
+        <img src="{{ event.image.url }}" alt="{{ event.title }}">
+    </div>
+    {% endif %}
+    
+    <div class="event-info">
+        <p class="event-description">{{ event.description }}</p>
+        
+        <div class="event-details">
+            <p><strong>Дата и время:</strong> {{ event.start_datetime|date:"d.m.Y H:i" }} - {{ event.end_datetime|date:"H:i" }}</p>
+            <p><strong>Место:</strong> {{ event.location }}</p>
+            {% if event.category %}
+            <p><strong>Категория:</strong> {{ event.category.name }}</p>
+            {% endif %}
+            <p><strong>Организатор:</strong> {{ event.organizer.get_full_name|default:event.organizer.username }}</p>
+            {% if event.max_participants > 0 %}
+            <p><strong>Максимум участников:</strong> {{ event.max_participants }}</p>
+            {% endif %}
+            {% if event.price > 0 %}
+            <p><strong>Цена:</strong> {{ event.price }} ₽</p>
+            {% else %}
+            <p><strong>Цена:</strong> Бесплатно</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if similar_events %}
+    <div class="similar-events">
+        <h2>Похожие мероприятия</h2>
+        <div class="events-grid">
+            {% for similar_event in similar_events %}
+            <div class="event-card">
+                <a href="{% url 'events:events_detail' similar_event.id %}">
+                    {% if similar_event.image %}
+                    <img src="{{ similar_event.image.url }}" alt="{{ similar_event.title }}">
+                    {% endif %}
+                    <h3>{{ similar_event.title }}</h3>
+                    <p>{{ similar_event.start_datetime|date:"d.m.Y H:i" }}</p>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'events/js/favorites.js' %}"></script>
+{% endblock %} 

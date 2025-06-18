@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль - EventMaster{% endblock %}
+
+{% block content %}
+<div class="container px-4">
+    <div class="row">
+        <!-- Боковая навигация -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="avatar-placeholder mb-3">
+                            <i class="fas fa-user-circle fa-4x text-primary"></i>
+                        </div>
+                        <h4 class="mb-1">{{ user.get_full_name|default:user.username }}</h4>
+                        <p class="text-muted mb-0">{{ user.email }}</p>
+                    </div>
+                    <div class="nav flex-column nav-pills" id="profile-tab" role="tablist">
+                        <a class="nav-link active" id="profile-info-tab" data-bs-toggle="pill" href="#profile-info" role="tab">
+                            <i class="fas fa-user me-2"></i>Информация
+                        </a>
+                        <a class="nav-link" id="favorites-tab" data-bs-toggle="pill" href="#favorites" role="tab">
+                            <i class="fas fa-heart me-2"></i>Избранное
+                        </a>
+                        <a class="nav-link" id="settings-tab" data-bs-toggle="pill" href="#settings" role="tab">
+                            <i class="fas fa-cog me-2"></i>Настройки
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="col-md-9">
+            <div class="tab-content" id="profile-tabContent">
+                <!-- Информация профиля -->
+                <div class="tab-pane fade show active" id="profile-info" role="tabpanel">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <h3 class="card-title mb-4">Информация профиля</h3>
+                            <form method="post" action="{% url 'accounts:profile' %}">
+                                {% csrf_token %}
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Имя</label>
+                                        <input type="text" class="form-control" name="first_name" value="{{ user.first_name }}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Фамилия</label>
+                                        <input type="text" class="form-control" name="last_name" value="{{ user.last_name }}">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" class="form-control" value="{{ user.email }}" readonly>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Избранные мероприятия -->
+                <div class="tab-pane fade" id="favorites" role="tabpanel">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <h3 class="card-title mb-4">Избранные мероприятия</h3>
+                            <div class="row g-4">
+                                {% for event in favorite_events %}
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <span class="badge bg-primary">{{ event.category.name }}</span>
+                                                <button class="btn btn-link text-danger p-0" onclick="removeFromFavorites({{ event.id }})">
+                                                    <i class="fas fa-heart"></i>
+                                                </button>
+                                            </div>
+                                            <h5 class="card-title">{{ event.title }}</h5>
+                                            <p class="card-text text-muted">{{ event.description|truncatechars:100 }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    <i class="far fa-calendar me-1"></i>
+                                                    {{ event.start_datetime|date:"d.m.Y H:i" }}
+                                                </small>
+                                                <a href="{% url 'events:events_detail' event.id %}" class="btn btn-outline-primary btn-sm">
+                                                    Подробнее
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="col-12">
+                                    <div class="text-center py-5">
+                                        <i class="far fa-heart fa-3x text-muted mb-3"></i>
+                                        <h5>У вас пока нет избранных мероприятий</h5>
+                                        <p class="text-muted">Добавляйте мероприятия в избранное, чтобы не пропустить интересные события</p>
+                                        <a href="{% url 'events:events_list' %}" class="btn btn-primary">Найти мероприятия</a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Настройки -->
+                <div class="tab-pane fade" id="settings" role="tabpanel">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <h3 class="card-title mb-4">Настройки</h3>
+                            <form method="post" action="{% url 'accounts:profile' %}">
+                                {% csrf_token %}
+                                <div class="mb-4">
+                                    <h5 class="mb-3">Уведомления</h5>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="email-notifications" name="email_notifications" checked>
+                                        <label class="form-check-label" for="email-notifications">Email-уведомления</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="event-reminders" name="event_reminders" checked>
+                                        <label class="form-check-label" for="event-reminders">Напоминания о мероприятиях</label>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <h5 class="mb-3">Конфиденциальность</h5>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" id="show-profile" name="show_profile" checked>
+                                        <label class="form-check-label" for="show-profile">Показывать мой профиль другим пользователям</label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Сохранить настройки</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .nav-pills .nav-link {
+        color: var(--text-color);
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .nav-pills .nav-link:hover {
+        background-color: var(--gray-color);
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        background-color: var(--gray-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid var(--gray-color);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+</style>
+
+<script>
+function removeFromFavorites(eventId) {
+    if (confirm('Вы уверены, что хотите удалить это мероприятие из избранного?')) {
+        fetch(`/events/${eventId}/toggle-favorite/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
+{% endblock %} 

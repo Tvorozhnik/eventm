@@ -1,0 +1,240 @@
+[
+    {
+        "model": "events.event",
+        "pk": 1,
+        "fields": {
+            "title": "Фестиваль современного искусства",
+            "description": "Крупнейший фестиваль современного искусства в городе. Выставки, перформансы, лекции и мастер-классы от ведущих художников.",
+            "start_datetime": "2024-01-15T10:00:00Z",
+            "end_datetime": "2024-01-15T20:00:00Z",
+            "location": "Центр современного искусства",
+            "max_participants": 200,
+            "price": 1500,
+            "category": 1,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 2,
+        "fields": {
+            "title": "Мастер-класс по программированию",
+            "description": "Практический мастер-класс по Python для начинающих. Создание простого веб-приложения с использованием Django.",
+            "start_datetime": "2024-02-20T14:00:00Z",
+            "end_datetime": "2024-02-20T18:00:00Z",
+            "location": "IT-центр",
+            "max_participants": 30,
+            "price": 2000,
+            "category": 2,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 3,
+        "fields": {
+            "title": "Концерт классической музыки",
+            "description": "Вечер классической музыки в исполнении симфонического оркестра. В программе произведения Моцарта и Бетховена.",
+            "start_datetime": "2024-03-25T19:00:00Z",
+            "end_datetime": "2024-03-25T22:00:00Z",
+            "location": "Концертный зал",
+            "max_participants": 500,
+            "price": 3000,
+            "category": 3,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 4,
+        "fields": {
+            "title": "Турнир по шахматам",
+            "description": "Ежегодный городской турнир по шахматам. Призы для победителей и угощение для всех участников.",
+            "start_datetime": "2025-05-01T10:00:00Z",
+            "end_datetime": "2025-05-01T18:00:00Z",
+            "location": "Шахматный клуб",
+            "max_participants": 64,
+            "price": 500,
+            "category": 4,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 5,
+        "fields": {
+            "title": "Фестиваль уличной еды",
+            "description": "Гастрономический фестиваль с участием лучших шеф-поваров города. Дегустации, мастер-классы и конкурсы.",
+            "start_datetime": "2025-05-05T12:00:00Z",
+            "end_datetime": "2025-05-05T22:00:00Z",
+            "location": "Центральная площадь",
+            "max_participants": 1000,
+            "price": 0,
+            "category": 5,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 6,
+        "fields": {
+            "title": "Мастер-класс по фотографии",
+            "description": "Практический мастер-класс по портретной фотографии. Работа с естественным светом и композицией.",
+            "start_datetime": "2025-05-10T15:00:00Z",
+            "end_datetime": "2025-05-10T19:00:00Z",
+            "location": "Фотостудия",
+            "max_participants": 15,
+            "price": 2500,
+            "category": 6,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 7,
+        "fields": {
+            "title": "Конференция по искусственному интеллекту",
+            "description": "Международная конференция о последних достижениях в области ИИ. Доклады ведущих специалистов и панельные дискуссии.",
+            "start_datetime": "2025-05-15T09:00:00Z",
+            "end_datetime": "2025-05-15T18:00:00Z",
+            "location": "Конференц-центр",
+            "max_participants": 300,
+            "price": 5000,
+            "category": 2,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 8,
+        "fields": {
+            "title": "Выставка современной живописи",
+            "description": "Персональная выставка известного художника. Более 50 работ в различных техниках.",
+            "start_datetime": "2025-05-20T11:00:00Z",
+            "end_datetime": "2025-05-20T20:00:00Z",
+            "location": "Галерея современного искусства",
+            "max_participants": 100,
+            "price": 800,
+            "category": 1,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 9,
+        "fields": {
+            "title": "Джазовый вечер",
+            "description": "Вечер джазовой музыки с участием местных и приглашенных музыкантов. Живая музыка и уютная атмосфера.",
+            "start_datetime": "2025-05-25T20:00:00Z",
+            "end_datetime": "2025-05-25T23:00:00Z",
+            "location": "Джаз-клуб",
+            "max_participants": 150,
+            "price": 2000,
+            "category": 3,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 10,
+        "fields": {
+            "title": "Турнир по настольному теннису",
+            "description": "Городской турнир по настольному теннису. Различные категории участников и ценные призы.",
+            "start_datetime": "2025-06-01T10:00:00Z",
+            "end_datetime": "2025-06-01T18:00:00Z",
+            "location": "Спортивный комплекс",
+            "max_participants": 32,
+            "price": 1000,
+            "category": 4,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 11,
+        "fields": {
+            "title": "Мастер-класс по приготовлению суши",
+            "description": "Практический мастер-класс по приготовлению традиционных японских суши. Все ингредиенты включены.",
+            "start_datetime": "2025-06-05T18:00:00Z",
+            "end_datetime": "2025-06-05T21:00:00Z",
+            "location": "Кулинарная школа",
+            "max_participants": 20,
+            "price": 3500,
+            "category": 5,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 12,
+        "fields": {
+            "title": "Выставка фотографий дикой природы",
+            "description": "Фотовыставка, посвященная дикой природе. Работы профессиональных фотографов-натуралистов.",
+            "start_datetime": "2025-06-10T10:00:00Z",
+            "end_datetime": "2025-06-10T20:00:00Z",
+            "location": "Музей природы",
+            "max_participants": 200,
+            "price": 600,
+            "category": 6,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 13,
+        "fields": {
+            "title": "Хакатон по разработке игр",
+            "description": "48-часовой хакатон по разработке компьютерных игр. Командное соревнование с призовым фондом.",
+            "start_datetime": "2025-06-15T10:00:00Z",
+            "end_datetime": "2025-06-17T10:00:00Z",
+            "location": "IT-парк",
+            "max_participants": 100,
+            "price": 0,
+            "category": 2,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    },
+    {
+        "model": "events.event",
+        "pk": 14,
+        "fields": {
+            "title": "Фестиваль уличного искусства",
+            "description": "Фестиваль граффити и уличного искусства. Мастер-классы, конкурсы и создание масштабных работ.",
+            "start_datetime": "2025-06-20T12:00:00Z",
+            "end_datetime": "2025-06-20T22:00:00Z",
+            "location": "Арт-квартал",
+            "max_participants": 300,
+            "price": 0,
+            "category": 1,
+            "organizer": 1,
+            "image": "",
+            "is_published": true
+        }
+    }
+] 

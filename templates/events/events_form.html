@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="form-header mb-4">
+                <h1 class="h2 mb-3">
+                    {% if form.instance.pk %}
+                        Редактирование мероприятия
+                    {% else %}
+                        Создание мероприятия
+                    {% endif %}
+                </h1>
+                <p class="text-muted">
+                    {% if form.instance.pk %}
+                        Внесите необходимые изменения в информацию о мероприятии
+                    {% else %}
+                        Заполните форму для создания нового мероприятия
+                    {% endif %}
+                </p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="event-form">
+                {% csrf_token %}
+                
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="h5 mb-4">Основная информация</h3>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">Название мероприятия</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.title.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.category.id_for_label }}" class="form-label">Категория</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.category.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.start_datetime.id_for_label }}" class="form-label">Дата и время начала</label>
+                                {{ form.start_datetime }}
+                                {% if form.start_datetime.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.start_datetime.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.end_datetime.id_for_label }}" class="form-label">Дата и время окончания</label>
+                                {{ form.end_datetime }}
+                                {% if form.end_datetime.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.end_datetime.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.location.id_for_label }}" class="form-label">Место проведения</label>
+                            {{ form.location }}
+                            {% if form.location.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.location.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="h5 mb-4">Описание и детали</h3>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.description.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.additional_info.id_for_label }}" class="form-label">Дополнительная информация</label>
+                            {{ form.additional_info }}
+                            {% if form.additional_info.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.additional_info.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.max_participants.id_for_label }}" class="form-label">Максимальное количество участников</label>
+                            {{ form.max_participants }}
+                            {% if form.max_participants.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.max_participants.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="h5 mb-4">Изображение</h3>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.image.id_for_label }}" class="form-label">Изображение мероприятия</label>
+                            {{ form.image }}
+                            {% if form.image.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.image.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if form.instance.image %}
+                        <div class="current-image mb-4">
+                            <p class="text-muted mb-2">Текущее изображение:</p>
+                            <img src="{{ form.instance.image.url }}" class="img-fluid" alt="Текущее изображение" style="max-height: 200px;">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        {% if form.instance.pk %}
+                            Сохранить изменения
+                        {% else %}
+                            Создать мероприятие
+                        {% endif %}
+                    </button>
+                    <a href="{% url 'events:events_list' %}" class="btn btn-outline-secondary">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-header {
+        text-align: center;
+    }
+
+    .event-form .card {
+        border-radius: 0;
+        border: 1px solid var(--border-color);
+    }
+
+    .event-form .card-body {
+        padding: 2rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 0;
+        border: 1px solid var(--border-color);
+        padding: 0.75rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: none;
+    }
+
+    textarea.form-control {
+        min-height: 150px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 0;
+    }
+
+    .current-image img {
+        border-radius: 0;
+        object-fit: cover;
+    }
+
+    .invalid-feedback {
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация datetime picker
+        const startDateTimeInput = document.getElementById('{{ form.start_datetime.id_for_label }}');
+        const endDateTimeInput = document.getElementById('{{ form.end_datetime.id_for_label }}');
+
+        if (startDateTimeInput && endDateTimeInput) {
+            flatpickr(startDateTimeInput, {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                locale: "ru",
+                minDate: "today"
+            });
+
+            flatpickr(endDateTimeInput, {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                locale: "ru",
+                minDate: "today"
+            });
+        }
+    });
+</script>
+{% endblock %}

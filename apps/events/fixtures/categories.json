@@ -1,0 +1,44 @@
+[
+    {
+        "model": "events.eventcategory",
+        "pk": 1,
+        "fields": {
+            "name": "Искусство"
+        }
+    },
+    {
+        "model": "events.eventcategory",
+        "pk": 2,
+        "fields": {
+            "name": "Технологии"
+        }
+    },
+    {
+        "model": "events.eventcategory",
+        "pk": 3,
+        "fields": {
+            "name": "Музыка"
+        }
+    },
+    {
+        "model": "events.eventcategory",
+        "pk": 4,
+        "fields": {
+            "name": "Спорт"
+        }
+    },
+    {
+        "model": "events.eventcategory",
+        "pk": 5,
+        "fields": {
+            "name": "Кулинария"
+        }
+    },
+    {
+        "model": "events.eventcategory",
+        "pk": 6,
+        "fields": {
+            "name": "Фотография"
+        }
+    }
+] 

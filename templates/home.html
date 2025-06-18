@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero секция -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Добро пожаловать в EventMaster</h1>
+                <p class="lead mb-4">Ваша платформа для организации и участия в интересных мероприятиях. Создавайте события, находите единомышленников и развивайтесь вместе с нами.</p>
+                <div class="d-flex gap-3">
+                    <a href="{% url 'events:events_list' %}" class="btn btn-primary">Найти мероприятия</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'events:events_create' %}" class="btn btn-outline-primary">Создать мероприятие</a>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">Войти</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'images/hero-image.jpg' %}" alt="EventMaster" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Возможности платформы -->
+<section class="features-section py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Возможности платформы</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <h3 class="h5 mb-3">Создание мероприятий</h3>
+                    <p class="text-muted">Создавайте и управляйте своими мероприятиями. Устанавливайте дату, время, место и максимальное количество участников.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="h5 mb-3">Поиск мероприятий</h3>
+                    <p class="text-muted">Находите интересные мероприятия по категориям, датам и местоположению. Фильтруйте и сортируйте результаты.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="h5 mb-3">Управление участниками</h3>
+                    <p class="text-muted">Отслеживайте количество участников, управляйте регистрацией и общайтесь с участниками ваших мероприятий.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Последние мероприятия -->
+<section class="latest-events-section py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Ближайшие мероприятия</h2>
+        <div class="row g-4">
+            {% for event in latest_events %}
+            <div class="col-md-4">
+                <div class="event-card">
+                    {% if event.image %}
+                        <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}">
+                    {% else %}
+                        <img src="{% static 'images/default-event.jpg' %}" class="card-img-top" alt="{{ event.title }}">
+                    {% endif %}
+                    <div class="card-body p-4">
+                        <span class="badge mb-2" style="background-color: {{ event.category.color }}; color: white;">
+                            {{ event.category.name }}
+                        </span>
+                        <h3 class="h5 mb-3">{{ event.title }}</h3>
+                        <p class="text-muted mb-3">{{ event.description|truncatewords:20 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> {{ event.start_datetime|date:"d.m.Y" }}
+                                <i class="fas fa-clock ms-2"></i> {{ event.start_datetime|time:"H:i" }}
+                            </small>
+                            <a href="{% url 'events:events_detail' event.id %}" class="btn btn-outline-primary btn-sm">Подробнее</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    В ближайшее время нет запланированных мероприятий
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'events:events_list' %}" class="btn btn-primary">Все мероприятия</a>
+        </div>
+    </div>
+</section>
+
+<!-- Призыв к действию -->
+<section class="cta-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-4">Готовы начать?</h2>
+                <p class="lead mb-4">Присоединяйтесь к нашему сообществу и станьте частью интересных событий!</p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'events:events_create' %}" class="btn btn-primary">Создать мероприятие</a>
+                {% else %}
+                    <a href="{% url 'accounts:register' %}" class="btn btn-primary">Зарегистрироваться</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 
